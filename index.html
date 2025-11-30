@@ -196,11 +196,6 @@
       color: #fffde7;
     }
 
-    .btn-green {
-      background: linear-gradient(135deg,#69f0ae,#00c853);
-      color: #263238;
-    }
-
     .emoji-circle {
       width: 110px;
       height: 110px;
@@ -391,6 +386,16 @@
         width: 100%;
         align-items: stretch;
       }
+      /* Mobilde KONTROL üstte, BAŞLA altta gözüksün */
+      .btn-check {
+        order: 1;
+      }
+      .emoji-circle {
+        order: 2;
+      }
+      .btn-start {
+        order: 3;
+      }
     }
   </style>
 </head>
@@ -414,7 +419,13 @@
         <div class="number-box" id="factor2">?</div>
         <div class="symbol">=</div>
         <div class="number-box">
-          <input type="number" id="answerInput" disabled />
+          <input
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            id="answerInput"
+            disabled
+          />
         </div>
       </div>
 
@@ -422,13 +433,13 @@
       <div class="score-summary" id="scoreSummary">Oyuncu: - | Puan: 0 / 100</div>
 
       <div class="feedback-row">
-        <button class="btn btn-blue" id="startBtn">BAŞLA</button>
+        <button class="btn btn-blue btn-start" id="startBtn">BAŞLA</button>
 
         <div class="emoji-circle" id="emojiCircle">
           <span id="emojiIcon"></span>
         </div>
 
-        <button class="btn btn-red" id="checkBtn">KONTROL</button>
+        <button class="btn btn-red btn-check" id="checkBtn">KONTROL</button>
       </div>
 
       <div class="bottom-row">
@@ -516,7 +527,25 @@
   <audio id="bgMusic" src="muzik.mp3" preload="auto" loop></audio>
 </div>
 
+<!-- Firebase compat CDN -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
 <script>
+  // Firebase config (senin projen)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlrVdLo7ZMqhLJb-xoImcFKuLC65v_20Y",
+    authDomain: "dort-islem-oyunu-608cb.firebaseapp.com",
+    projectId: "dort-islem-oyunu-608cb",
+    storageBucket: "dort-islem-oyunu-608cb.firebasestorage.app",
+    messagingSenderId: "133255919254",
+    appId: "1:133255919254:web:19b73a36e9b76d4d0a34b7",
+    measurementId: "G-J0693K6LVX"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
   // ==== KÜFÜR / ARGO / UYGUNSUZ İSİM FİLTRESİ ====
 
   const bannedWords = [
@@ -530,7 +559,6 @@
     if (!str) return "";
     let s = str.toLowerCase();
 
-    // Türkçe karakterleri sadeleştir
     s = s
       .replace(/ğ/g,"g")
       .replace(/ü/g,"u")
@@ -539,7 +567,6 @@
       .replace(/ö/g,"o")
       .replace(/ç/g,"c");
 
-    // Leetspeak -> harf dönüşümleri
     s = s
       .replace(/0/g,"o")
       .replace(/1/g,"i")
@@ -548,7 +575,6 @@
       .replace(/5/g,"s")
       .replace(/7/g,"t");
 
-    // Boşluk ve noktalama işaretlerini kaldır
     s = s.replace(/[\s\.\,\-\_\*\!\?\:\;\|\/\\\"\']/g,"");
 
     return s;
@@ -605,35 +631,73 @@
   let musicEnabled = true;
   let effectsEnabled = true;
 
-  // ==== SKORLARI KALICI SAKLAMA (localStorage) ====
-
-  function saveHighScores() {
-    try {
-      localStorage.setItem("dortIslemSkorlar", JSON.stringify(highScores));
-    } catch (e) {
-      console.warn("Skorlar kaydedilemedi:", e);
-    }
-  }
-
-  function loadHighScores() {
-    try {
-      const saved = localStorage.getItem("dortIslemSkorlar");
-      if (saved) {
-        highScores = JSON.parse(saved);
-        if (!Array.isArray(highScores)) highScores = [];
-        renderScoreboard();
-      }
-    } catch (e) {
-      console.warn("Skorlar yüklenemedi:", e);
-      highScores = [];
-    }
-  }
-
-  // ==== YARDIMCI FONKSİYONLAR ====
-
   function formatScore(score) {
     return Number.isInteger(score) ? score.toString() : score.toFixed(1);
   }
+
+  // ==== FIRESTORE SKOR KAYDET/OKU ====
+
+  async function saveScoreOnline(name, score) {
+    try {
+      await db.collection("scores").add({
+        name: name,
+        score: score,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Skor kaydedilemedi:", e);
+    }
+  }
+
+  async function loadScoresOnline() {
+    try {
+      const snapshot = await db.collection("scores")
+        .orderBy("score", "desc")
+        .orderBy("createdAt", "asc")
+        .limit(10)
+        .get();
+
+      highScores = [];
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (typeof d.score === "number" && d.name) {
+          highScores.push({ name: d.name, score: d.score });
+        }
+      });
+      renderScoreboard();
+    } catch (e) {
+      console.error("Skorlar alınamadı:", e);
+    }
+  }
+
+  // 🔒 GİZLİ ÖĞRETMEN SIFIRLAMA (Shift + Z)
+  async function clearScoresOnline() {
+    const onay = confirm("Tüm skorları sıfırlamak istediğinizden emin misiniz?");
+    if (!onay) return;
+
+    try {
+      const snapshot = await db.collection("scores").get();
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+
+      highScores = [];
+      renderScoreboard();
+      alert("Sıralama tablosu başarıyla temizlendi.");
+    } catch (e) {
+      console.error("Skorlar silinemedi:", e);
+      alert("Skorlar silinirken bir hata oluştu.");
+    }
+  }
+
+  // Klavyede Shift + Z kısayolu
+  document.addEventListener("keydown", (e) => {
+    if (e.shiftKey && (e.key === "z" || e.key === "Z")) {
+      clearScoresOnline();
+    }
+  });
+
+  // ==== YARDIMCI FONKSİYONLAR ====
 
   function updateScoreSummary() {
     const nameText = currentPlayer ? currentPlayer : "-";
@@ -728,11 +792,11 @@
   });
 
   restartBtn.addEventListener("click", () => {
-    resetCurrentGame(false); // isim kalsın
+    resetCurrentGame(false);
   });
 
   exitBtn.addEventListener("click", () => {
-    fullReset(true);
+    fullReset();
     alert("Oyun sıfırlandı. Sayfayı kapatabilirsiniz.");
   });
 
@@ -817,7 +881,14 @@
       return;
     }
 
-    const userAnswer = Number(val);
+    const userAnswer = parseInt(val, 10);
+
+    if (isNaN(userAnswer)) {
+      alert("Lütfen sadece sayı yaz.");
+      answerInput.focus();
+      return;
+    }
+
     const correctAnswer = getCorrectAnswer();
 
     if (userAnswer === correctAnswer) {
@@ -840,7 +911,7 @@
 
   // ==== OYUN BİTİŞİ ====
 
-  function endGameForCurrentPlayer(timeUp) {
+  async function endGameForCurrentPlayer(timeUp) {
     stopTimer();
     stopMusic();
     answerInput.disabled = true;
@@ -860,19 +931,8 @@
       alert(name + " için tur bitti.\nPuan: " + puanMetni + " / 100");
     }
 
-    const existing = highScores.find(item => item.name === name);
-    if (existing) {
-      if (finalScore > existing.score) {
-        existing.score = finalScore;
-      }
-    } else {
-      highScores.push({ name, score: finalScore });
-    }
-
-    highScores.sort((a, b) => b.score - a.score);
-    highScores = highScores.slice(0, 10);
-    renderScoreboard();
-    saveHighScores(); // KALICI OLARAK KAYDET
+    await saveScoreOnline(name, finalScore);
+    await loadScoresOnline();
 
     questionCount = 0;
     currentScore = 0;
@@ -929,13 +989,8 @@
     updateQuestionInfo();
   }
 
-  function fullReset(clearScores) {
+  function fullReset() {
     resetCurrentGame(true);
-    if (clearScores) {
-      highScores = [];
-      renderScoreboard();
-      saveHighScores();
-    }
   }
 
   // ==== EMOJİ & SES ====
@@ -1020,7 +1075,7 @@
   updateGameConfigForTime();
   updateScoreSummary();
   updateTimerDisplay();
-  loadHighScores(); // Sayfa açılır açılmaz eski skorları yükle
+  loadScoresOnline(); // Sayfa açılınca Firestore'dan sıralamayı yükle
 </script>
 </body>
 </html>
