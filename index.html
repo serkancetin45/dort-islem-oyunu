@@ -386,7 +386,6 @@
         width: 100%;
         align-items: stretch;
       }
-      /* Mobilde KONTROL üstte, BAŞLA altta gözüksün */
       .btn-check {
         order: 1;
       }
@@ -411,7 +410,6 @@
   </header>
 
   <main>
-    <!-- Sol panel -->
     <section class="left-panel">
       <div class="equation-row">
         <div class="number-box" id="factor1">?</div>
@@ -507,7 +505,6 @@
       </div>
     </section>
 
-    <!-- Sağ panel: sadece sıralama -->
     <section class="right-panel">
       <div class="scoreboard">
         <h3>SIRALAMA</h3>
@@ -521,18 +518,15 @@
     </section>
   </main>
 
-  <!-- Sesler -->
   <audio id="correctSound" src="alkis.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="diit.mp3" preload="auto"></audio>
   <audio id="bgMusic" src="muzik.mp3" preload="auto" loop></audio>
 </div>
 
-<!-- Firebase compat CDN -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-  // Firebase config (senin projen)
   const firebaseConfig = {
     apiKey: "AIzaSyDlrVdLo7ZMqhLJb-xoImcFKuLC65v_20Y",
     authDomain: "dort-islem-oyunu-608cb.firebaseapp.com",
@@ -546,7 +540,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // ==== KÜFÜR / ARGO / UYGUNSUZ İSİM FİLTRESİ ====
+  const COLLECTION_NAME = "puanlar"; // 🔴 Artık burada
 
   const bannedWords = [
     "amk","aq","orospu","sikerim","sik","piç","ibne","yarrak",
@@ -588,8 +582,6 @@
       normalized.includes(normalizeName(word))
     );
   }
-
-  // ==== OYUN DEĞİŞKENLERİ ====
 
   let gameTime = 60;
   let maxQuestions = 10;
@@ -635,11 +627,9 @@
     return Number.isInteger(score) ? score.toString() : score.toFixed(1);
   }
 
-  // ==== FIRESTORE SKOR KAYDET/OKU ====
-
   async function saveScoreOnline(name, score) {
     try {
-      await db.collection("scores").add({
+      await db.collection(COLLECTION_NAME).add({
         name: name,
         score: score,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -651,7 +641,7 @@
 
   async function loadScoresOnline() {
     try {
-      const snapshot = await db.collection("scores")
+      const snapshot = await db.collection(COLLECTION_NAME)
         .orderBy("score", "desc")
         .orderBy("createdAt", "asc")
         .limit(10)
@@ -670,13 +660,12 @@
     }
   }
 
-  // 🔒 GİZLİ ÖĞRETMEN SIFIRLAMA (Shift + Z)
   async function clearScoresOnline() {
     const onay = confirm("Tüm skorları sıfırlamak istediğinizden emin misiniz?");
     if (!onay) return;
 
     try {
-      const snapshot = await db.collection("scores").get();
+      const snapshot = await db.collection(COLLECTION_NAME).get();
       const batch = db.batch();
       snapshot.forEach(doc => batch.delete(doc.ref));
       await batch.commit();
@@ -690,14 +679,11 @@
     }
   }
 
-  // Klavyede Shift + Z kısayolu
   document.addEventListener("keydown", (e) => {
     if (e.shiftKey && (e.key === "z" || e.key === "Z")) {
       clearScoresOnline();
     }
   });
-
-  // ==== YARDIMCI FONKSİYONLAR ====
 
   function updateScoreSummary() {
     const nameText = currentPlayer ? currentPlayer : "-";
@@ -722,8 +708,6 @@
     perQuestionScore = 100 / maxQuestions;
     updateQuestionInfo();
   }
-
-  // ==== AYAR EVENTLERİ ====
 
   document.querySelectorAll("input[name='time']").forEach(radio => {
     radio.addEventListener("change", (e) => {
@@ -751,8 +735,6 @@
   toggleEffects.addEventListener("change", () => {
     effectsEnabled = toggleEffects.checked;
   });
-
-  // ==== BUTONLAR ====
 
   startBtn.addEventListener("click", () => {
     const name = playerNameInput.value.trim();
@@ -799,8 +781,6 @@
     fullReset();
     alert("Oyun sıfırlandı. Sayfayı kapatabilirsiniz.");
   });
-
-  // ==== SORU OLUŞTURMA ====
 
   function chooseOperationForQuestion() {
     if (operationMode === "mix") {
@@ -869,8 +849,6 @@
     }
   }
 
-  // ==== CEVAP KONTROL ====
-
   function checkAnswer() {
     if (currentA === null || currentB === null) return;
 
@@ -908,8 +886,6 @@
       askNewQuestion();
     }
   }
-
-  // ==== OYUN BİTİŞİ ====
 
   async function endGameForCurrentPlayer(timeUp) {
     stopTimer();
@@ -966,8 +942,6 @@
     });
   }
 
-  // ==== RESET FONKSİYONLARI ====
-
   function resetCurrentGame(clearName) {
     questionCount = 0;
     currentScore = 0;
@@ -992,8 +966,6 @@
   function fullReset() {
     resetCurrentGame(true);
   }
-
-  // ==== EMOJİ & SES ====
 
   function showEmoji(isCorrect) {
     emojiIcon.textContent = isCorrect ? "😊" : "😢";
@@ -1037,8 +1009,6 @@
     }
   }
 
-  // ==== SÜRE ====
-
   function startTimer() {
     stopTimer();
     remainingTime = gameTime;
@@ -1070,12 +1040,10 @@
     timerDisplay.textContent = "SÜRE: " + remainingTime + " sn";
   }
 
-  // ==== BAŞLANGIÇ ====
-
   updateGameConfigForTime();
   updateScoreSummary();
   updateTimerDisplay();
-  loadScoresOnline(); // Sayfa açılınca Firestore'dan sıralamayı yükle
+  loadScoresOnline();
 </script>
 </body>
 </html>
