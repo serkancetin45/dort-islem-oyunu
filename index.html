@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.SINIFLAR DÖRT İŞLEM OYUNU</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #ffcc80 0, #ff8a65 25%, #4527a0 60%, #1a237e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .wrapper {
+      max-width: 980px;
+      width: 100%;
+      margin: 10px;
+      padding: 12px;
+      background: rgba(12, 16, 41, 0.95);
+      border-radius: 20px;
+      box-shadow:
+        0 0 22px rgba(0,0,0,0.5),
+        0 0 32px rgba(124, 77, 255, 0.7);
+      border: 3px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 6px 12px;
+      border-radius: 14px;
+      background: linear-gradient(90deg,#ffb300,#ff7043,#7c4dff);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 5px 14px rgba(0,0,0,0.35);
+    }
+
+    header .title-left {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 11px;
+      text-shadow: 0 0 5px rgba(0,0,0,0.4);
+    }
+
+    header .title-center {
+      font-size: 16px;
+      text-align: center;
+      text-shadow: 0 0 7px rgba(0,0,0,0.5);
+    }
+
+    header .title-right {
+      font-size: 12px;
+      text-align: right;
+    }
+
+    header .timer {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 10px;
+    }
+
+    .left-panel {
+      border-radius: 18px;
+      padding: 12px 12px 10px;
+      position: relative;
+      background: radial-gradient(circle at top left, #263238, #111827);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+      min-height: 400px;
+    }
+
+    .equation-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .number-box {
+      width: 115px;
+      height: 95px;
+      border-radius: 20px;
+      border: 3px solid #ffca28;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 800;
+      background: radial-gradient(circle at top, #fffde7, #ffe082);
+      color: #e65100;
+      box-shadow:
+        0 5px 0 #f9a825,
+        0 8px 12px rgba(0,0,0,0.6);
+    }
+
+    .symbol {
+      font-size: 30px;
+      font-weight: 800;
+      color: #ffeb3b;
+      text-shadow: 0 0 7px rgba(255, 235, 59, 0.9);
+    }
+
+    #answerInput {
+      width: 90%;
+      height: 70%;
+      border-radius: 16px;
+      border: 3px solid #ffca28;
+      text-align: center;
+      font-size: 30px;
+      outline: none;
+      color: #1a237e;
+      background: #fffde7;
+      box-shadow:
+        0 4px 0 #f9a825,
+        0 7px 12px rgba(0,0,0,0.6);
+    }
+
+    #answerInput:disabled {
+      background: #cfd8dc;
+      box-shadow: none;
+    }
+
+    .question-info {
+      text-align: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: #e0e0e0;
+    }
+
+    .score-summary {
+      text-align: center;
+      font-size: 12px;
+      color: #cfd8dc;
+      margin-bottom: 8px;
+    }
+
+    .feedback-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 10px 10px;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #212121;
+      width: 150px;
+      text-align: center;
+      box-shadow:
+        0 4px 0 rgba(0,0,0,0.45),
+        0 7px 12px rgba(0,0,0,0.7);
+      transition: transform 0.1s, box-shadow 0.1s, filter 0.15s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn:active {
+      transform: translateY(3px);
+      box-shadow:
+        0 3px 0 rgba(0,0,0,0.45),
+        0 5px 9px rgba(0,0,0,0.7);
+    }
+
+    .btn-blue {
+      background: linear-gradient(135deg,#40c4ff,#2979ff);
+      color: #fffde7;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg,#ff5252,#d50000);
+      color: #fffde7;
+    }
+
+    .emoji-circle {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 4px solid #ff80ab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      background: radial-gradient(circle at 30% 30%, #ffecb3, #ff80ab);
+      box-shadow:
+        0 0 16px rgba(255, 128, 171, 0.7),
+        0 0 24px rgba(255, 234, 0, 0.6);
+    }
+
+    .emoji-circle.show {
+      opacity: 1;
+    }
+
+    .bottom-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-top: 6px;
+      gap: 10px;
+    }
+
+    .settings {
+      background: rgba(33, 33, 33, 0.9);
+      color: #eceff1;
+      border-radius: 14px;
+      padding: 6px 10px;
+      font-size: 11px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow:
+        0 4px 10px rgba(0,0,0,0.8),
+        0 0 14px rgba(0, 229, 255, 0.4);
+      border: 2px solid rgba(144, 202, 249, 0.5);
+    }
+
+    .settings h3 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #ffeb3b;
+      text-shadow: 0 0 6px rgba(255, 235, 59, 0.9);
+    }
+
+    .settings-section-title {
+      font-weight: 700;
+      margin-top: 4px;
+      margin-bottom: 2px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #80d8ff;
+    }
+
+    .settings label {
+      display: block;
+      margin-bottom: 2px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .settings input[type="radio"],
+    .settings input[type="checkbox"] {
+      margin-right: 5px;
+      transform: scale(1.0);
+    }
+
+    .settings hr {
+      border: none;
+      border-top: 1px solid rgba(176, 190, 197, 0.5);
+      margin: 4px 0;
+    }
+
+    .settings input[type="text"] {
+      width: 100%;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid #90caf9;
+      font-size: 11px;
+      margin-bottom: 4px;
+      outline: none;
+    }
+
+    .right-panel {
+      border-radius: 18px;
+      background: radial-gradient(circle at top, #263238, #0b1021);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow:
+        0 4px 14px rgba(0,0,0,0.8),
+        0 0 18px rgba(0, 229, 255, 0.4);
+      border: 2px solid rgba(129, 212, 250, 0.5);
+    }
+
+    .scoreboard {
+      background: rgba(18, 32, 47, 0.95);
+      border-radius: 12px;
+      padding: 8px 10px;
+      box-shadow:
+        0 3px 8px rgba(0,0,0,0.7),
+        0 0 10px rgba(120, 144, 156, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .scoreboard h3 {
+      margin: 0;
+      font-size: 14px;
+      text-align: center;
+      letter-spacing: 1px;
+      color: #ffeb3b;
+      text-shadow: 0 0 7px rgba(255, 235, 59, 0.8);
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      margin: 4px 0 4px;
+      justify-content: space-between;
+    }
+
+    .mode-tab {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 4px 6px;
+      font-size: 10px;
+      cursor: pointer;
+      background: rgba(55, 71, 79, 0.9);
+      color: #cfd8dc;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mode-tab.active {
+      background: linear-gradient(135deg,#ffb300,#ff7043);
+      color: #212121;
+      font-weight: 700;
+      box-shadow: 0 0 8px rgba(255,183,77,0.8);
+    }
+
+    .score-note {
+      font-size: 10px;
+      color: #b0bec5;
+      margin: 0 0 4px;
+    }
+
+    .scoreboard-subtitle {
+      font-size: 11px;
+      text-align: left;
+      margin: 2px 0 2px;
+      color: #80d8ff;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .scoreboard-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      margin-bottom: 2px;
+      padding: 0 2px;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+      color: #b0bec5;
+    }
+
+    #scoreList,
+    #weeklyScoreList {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    #weeklyScoreList {
+      max-height: 140px;
+    }
+
+    #scoreList li,
+    #weeklyScoreList li {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 2px;
+      border-bottom: 1px solid rgba(69, 90, 100, 0.7);
+    }
+
+    #scoreList li span.rank,
+    #weeklyScoreList li span.rank {
+      width: 22px;
+      color: #fff59d;
+    }
+
+    #scoreList li span.name,
+    #weeklyScoreList li span.name {
+      flex: 1;
+      padding: 0 4px;
+      color: #eceff1;
+    }
+
+    #scoreList li span.score,
+    #weeklyScoreList li span.score {
+      width: 46px;
+      text-align: right;
+      font-weight: 700;
+      color: #69f0ae;
+    }
+
+    #scoreList li span.time,
+    #weeklyScoreList li span.time {
+      width: 54px;
+      text-align: right;
+      font-size: 11px;
+      color: #ffcc80;
+    }
+
+    .right-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-end;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .feedback-row {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+      .bottom-row {
+        flex-direction: column;
+      }
+      .right-actions {
+        width: 100%;
+        align-items: stretch;
+      }
+      .btn-check {
+        order: 1;
+      }
+      .emoji-circle {
+        order: 2;
+      }
+      .btn-start {
+        order: 3;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div class="title-left">HÜSEYİN AKDAĞ İLKOKULU</div>
+    <div class="title-center">4.SINIFLAR DÖRT İŞLEM OYUNU</div>
+    <div class="title-right">
+      <div>TOPLAM PUAN: 100</div>
+      <div id="timerDisplay" class="timer">SÜRE: 60 sn</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="left-panel">
+      <div class="equation-row">
+        <div class="number-box" id="factor1">?</div>
+        <div class="symbol" id="opSymbol">×</div>
+        <div class="number-box" id="factor2">?</div>
+        <div class="symbol">=</div>
+        <div class="number-box">
+          <input
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            id="answerInput"
+            disabled
+          />
+        </div>
+      </div>
+
+      <div class="question-info" id="questionInfo">Soru: 0 / 10</div>
+      <div class="score-summary" id="scoreSummary">Oyuncu: - | Puan: 0 / 100</div>
+
+      <div class="feedback-row">
+        <button class="btn btn-blue btn-start" id="startBtn">BAŞLA</button>
+
+        <div class="emoji-circle" id="emojiCircle">
+          <span id="emojiIcon"></span>
+        </div>
+
+        <button class="btn btn-red btn-check" id="checkBtn">KONTROL</button>
+      </div>
+
+      <div class="bottom-row">
+        <div class="settings">
+          <h3>AYARLAR</h3>
+
+          <div class="settings-section-title">Oyuncu adı</div>
+          <input type="text" id="playerNameInput" placeholder="Adını yaz, oyuna başla">
+
+          <div class="settings-section-title">Süre seç</div>
+          <label>
+            <input type="radio" name="time" value="60" checked>
+            1 dakika (10 soru)
+          </label>
+          <label>
+            <input type="radio" name="time" value="120">
+            2 dakika (20 soru)
+          </label>
+          <label>
+            <input type="radio" name="time" value="180">
+            3 dakika (30 soru)
+          </label>
+
+          <hr />
+
+          <div class="settings-section-title">İşlem türü</div>
+          <label>
+            <input type="radio" name="op" value="mul" checked>
+            Çarpma
+          </label>
+          <label>
+            <input type="radio" name="op" value="add">
+            Toplama
+          </label>
+          <label>
+            <input type="radio" name="op" value="sub">
+            Çıkarma
+          </label>
+          <label>
+            <input type="radio" name="op" value="div">
+            Bölme
+          </label>
+          <label>
+            <input type="radio" name="op" value="mix">
+            Karma (karışık)
+          </label>
+
+          <hr />
+
+          <div class="settings-section-title">Ses ayarları</div>
+          <label>
+            <input type="checkbox" id="toggleMusic" checked>
+            Müzik
+          </label>
+          <label>
+            <input type="checkbox" id="toggleEffects" checked>
+            Efektler
+          </label>
+        </div>
+
+        <div class="right-actions">
+          <button class="btn btn-blue" id="restartBtn">YENİDEN BAŞLAT</button>
+          <button class="btn btn-red" id="exitBtn">ÇIKIŞ</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="right-panel">
+      <div class="scoreboard">
+        <h3>SIRALAMA LİGİ</h3>
+
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-mode="mul">Çarpma</button>
+          <button class="mode-tab" data-mode="add">Toplama</button>
+          <button class="mode-tab" data-mode="sub">Çıkarma</button>
+          <button class="mode-tab" data-mode="div">Bölme</button>
+          <button class="mode-tab" data-mode="mix">Karma</button>
+        </div>
+
+        <p class="score-note">
+          Sıralama önce puana göredir; puan eşitse daha kısa sürede bitiren önde görünür.
+        </p>
+
+        <div class="scoreboard-subtitle" id="modeGeneralTitle">Çarpma - Genel İlk 35</div>
+        <div class="scoreboard-header">
+          <span>#</span>
+          <span>İSİM</span>
+          <span>PUAN</span>
+          <span>SÜRE</span>
+        </div>
+        <ol id="scoreList"></ol>
+
+        <div class="scoreboard-subtitle" id="modeWeeklyTitle">Çarpma - Bu Hafta İlk 100</div>
+        <div class="scoreboard-header">
+          <span>#</span>
+          <span>İSİM</span>
+          <span>PUAN</span>
+          <span>SÜRE</span>
+        </div>
+        <ol id="weeklyScoreList"></ol>
+      </div>
+    </section>
+  </main>
+
+  <audio id="correctSound" src="alkis.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="diit.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="muzik.mp3" preload="auto" loop></audio>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // --- Firebase ayarları ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDlrVdLo7ZMqhLJb-xoImcFKuLC65v_20Y",
+    authDomain: "dort-islem-oyunu-608cb.firebaseapp.com",
+    projectId: "dort-islem-oyunu-608cb",
+    storageBucket: "dort-islem-oyunu-608cb.firebasestorage.app",
+    messagingSenderId: "133255919254",
+    appId: "1:133255919254:web:19b73a36e9b76d4d0a34b7",
+    measurementId: "G-J0693K6LVX"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const COLLECTION_NAME = "puanlar";
+
+  // ----- Uygunsuz isim filtresi -----
+  const bannedWords = [
+    "amk","aq","orospu","sikerim","sik","piç","ibne","yarrak",
+    "amına","mk","oç","ananı","göt","kavat","pezevenk",
+    "seks","sex","porn","porno","şerefsiz","kahpe",
+    "travesti","fetö","terör"
+  ];
+
+  function normalizeName(str) {
+    if (!str) return "";
+    let s = str.toLowerCase();
+
+    s = s
+      .replace(/ğ/g,"g")
+      .replace(/ü/g,"u")
+      .replace(/ş/g,"s")
+      .replace(/ı/g,"i")
+      .replace(/ö/g,"o")
+      .replace(/ç/g,"c");
+
+    s = s
+      .replace(/0/g,"o")
+      .replace(/1/g,"i")
+      .replace(/3/g,"e")
+      .replace(/4/g,"a")
+      .replace(/5/g,"s")
+      .replace(/7/g,"t");
+
+    s = s.replace(/[\s\.\,\-\_\*\!\?\:\;\|\/\\\"\']/g,"");
+    return s;
+  }
+
+  function isNameAllowed(name) {
+    const normalized = normalizeName(name);
+    if (!normalized) return false;
+    return !bannedWords.some(word =>
+      normalized.includes(normalizeName(word))
+    );
+  }
+
+  // ----- Oyun değişkenleri -----
+  let gameTime = 60;
+  let maxQuestions = 10;
+  let perQuestionScore = 10;
+
+  const factor1Box = document.getElementById("factor1");
+  const factor2Box = document.getElementById("factor2");
+  const opSymbolEl = document.getElementById("opSymbol");
+  const answerInput = document.getElementById("answerInput");
+  const startBtn = document.getElementById("startBtn");
+  const checkBtn = document.getElementById("checkBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const exitBtn = document.getElementById("exitBtn");
+  const scoreSummaryEl = document.getElementById("scoreSummary");
+  const scoreListEl = document.getElementById("scoreList");
+  const weeklyScoreListEl = document.getElementById("weeklyScoreList");
+  const emojiCircle = document.getElementById("emojiCircle");
+  const emojiIcon = document.getElementById("emojiIcon");
+  const correctSound = document.getElementById("correctSound");
+  const wrongSound = document.getElementById("wrongSound");
+  const bgMusic = document.getElementById("bgMusic");
+  const timerDisplay = document.getElementById("timerDisplay");
+  const toggleMusic = document.getElementById("toggleMusic");
+  const toggleEffects = document.getElementById("toggleEffects");
+  const questionInfoEl = document.getElementById("questionInfo");
+  const playerNameInput = document.getElementById("playerNameInput");
+
+  const modeGeneralTitle = document.getElementById("modeGeneralTitle");
+  const modeWeeklyTitle = document.getElementById("modeWeeklyTitle");
+  const modeTabs = document.querySelectorAll(".mode-tab");
+
+  const MODE_LABELS = {
+    mul: "Çarpma",
+    add: "Toplama",
+    sub: "Çıkarma",
+    div: "Bölme",
+    mix: "Karma"
+  };
+
+  let operationMode = "mul";
+  let currentOp = "mul";
+  let currentPlayer = "";
+  let currentScore = 0;
+  let questionCount = 0;
+  let currentA = null;
+  let currentB = null;
+
+  let remainingTime = gameTime;
+  let timerInterval = null;
+
+  let musicEnabled = true;
+  let effectsEnabled = true;
+
+  let activeMode = "mul";
+  let modeScoresAll = {
+    mul: [], add: [], sub: [], div: [], mix: []
+  };
+  let modeScoresWeek = {
+    mul: [], add: [], sub: [], div: [], mix: []
+  };
+
+  function formatScore(score) {
+    return Number.isInteger(score) ? score.toString() : score.toFixed(1);
+  }
+
+  function compareEntries(a, b) {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.timeUsed - b.timeUsed; // puan eşitse daha az süre önde
+  }
+
+  // ---------- Firestore: Skor kaydet / oku ----------
+
+  async function saveScoreOnline(name, score) {
+    try {
+      const timeUsed = gameTime - remainingTime;  // kaç saniyede bitirdi
+      await db.collection(COLLECTION_NAME).add({
+        isim: name,
+        Gol: score,
+        sure: timeUsed,
+        mod: operationMode, // seçili mod (mul/add/sub/div/mix)
+        oluşturuldu: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Skor kaydedilemedi:", e);
+    }
+  }
+
+  async function loadScoresOnline() {
+    try {
+      const snapshot = await db.collection(COLLECTION_NAME).get();
+
+      const modes = ["mul","add","sub","div","mix"];
+      const allByMode = {
+        mul: [], add: [], sub: [], div: [], mix: []
+      };
+      const weekByMode = {
+        mul: [], add: [], sub: [], div: [], mix: []
+      };
+
+      const now = new Date();
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const name = d.isim || d.name || "İsimsiz";
+        const sRaw = (d.Gol != null ? d.Gol : d.score);
+        const s = Number(sRaw);
+        if (isNaN(s)) return;
+
+        let mode = d.mod || "mul";
+        if (!modes.includes(mode)) mode = "mul";
+
+        let timeUsed = 999999;
+        if (typeof d.sure === "number" && !isNaN(d.sure)) {
+          timeUsed = d.sure;
+        }
+
+        let createdAt = null;
+        if (d.oluşturuldu && d.oluşturuldu.toDate) {
+          createdAt = d.oluşturuldu.toDate();
+        } else if (d.createdAt && d.createdAt.toDate) {
+          createdAt = d.createdAt.toDate();
+        }
+
+        const entry = { name, score: s, timeUsed, createdAt, mode };
+        allByMode[mode].push(entry);
+
+        if (createdAt && createdAt >= oneWeekAgo) {
+          weekByMode[mode].push(entry);
+        }
+      });
+
+      modes.forEach(m => {
+        allByMode[m].sort(compareEntries);
+        weekByMode[m].sort(compareEntries);
+        allByMode[m] = allByMode[m].slice(0, 35);
+        weekByMode[m] = weekByMode[m].slice(0, 100);
+      });
+
+      modeScoresAll = allByMode;
+      modeScoresWeek = weekByMode;
+
+      renderScoreboard();
+    } catch (e) {
+      console.error("Skorlar alınamadı:", e);
+    }
+  }
+
+  async function clearScoresOnline() {
+    const onay = confirm("Tüm skorları sıfırlamak istediğinizden emin misiniz?");
+    if (!onay) return;
+
+    try {
+      const snapshot = await db.collection(COLLECTION_NAME).get();
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+
+      Object.keys(modeScoresAll).forEach(m => modeScoresAll[m] = []);
+      Object.keys(modeScoresWeek).forEach(m => modeScoresWeek[m] = []);
+      renderScoreboard();
+      alert("Sıralama tablosu başarıyla temizlendi.");
+    } catch (e) {
+      console.error("Skorlar silinemedi:", e);
+      alert("Skorlar silinirken bir hata oluştu.");
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.shiftKey && (e.key === "z" || e.key === "Z")) {
+      clearScoresOnline();
+    }
+  });
+
+  // ---------- Yardımcılar ----------
+
+  function updateScoreSummary() {
+    const nameText = currentPlayer ? currentPlayer : "-";
+    scoreSummaryEl.textContent =
+      "Oyuncu: " + nameText + " | Puan: " + formatScore(currentScore) + " / 100";
+  }
+
+  function updateQuestionInfo() {
+    questionInfoEl.textContent = "Soru: " + questionCount + " / " + maxQuestions;
+  }
+
+  function updateGameConfigForTime() {
+    if (gameTime === 60) {
+      maxQuestions = 10;
+    } else if (gameTime === 120) {
+      maxQuestions = 20;
+    } else if (gameTime === 180) {
+      maxQuestions = 30;
+    } else {
+      maxQuestions = 10;
+    }
+    perQuestionScore = 100 / maxQuestions;
+    updateQuestionInfo();
+  }
+
+  function renderList(olElement, list) {
+    olElement.innerHTML = "";
+    list.forEach((item, index) => {
+      const li = document.createElement("li");
+
+      const rankSpan = document.createElement("span");
+      rankSpan.className = "rank";
+      rankSpan.textContent = (index + 1) + ".";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "name";
+      nameSpan.textContent = item.name;
+
+      const scoreSpan = document.createElement("span");
+      scoreSpan.className = "score";
+      scoreSpan.textContent = formatScore(item.score);
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "time";
+      let displayTime = "-";
+      if (typeof item.timeUsed === "number" &&
+          item.timeUsed >= 0 &&
+          item.timeUsed < 10000) {
+        displayTime = item.timeUsed + " sn";
+      }
+      timeSpan.textContent = displayTime;
+
+      li.appendChild(rankSpan);
+      li.appendChild(nameSpan);
+      li.appendChild(scoreSpan);
+      li.appendChild(timeSpan);
+
+      olElement.appendChild(li);
+    });
+  }
+
+  function renderScoreboard() {
+    const listAll = modeScoresAll[activeMode] || [];
+    const listWeek = modeScoresWeek[activeMode] || [];
+    renderList(scoreListEl, listAll);
+    renderList(weeklyScoreListEl, listWeek);
+  }
+
+  function updateModeTitles() {
+    const label = MODE_LABELS[activeMode] || "";
+    modeGeneralTitle.textContent = label + " - Genel İlk 35";
+    modeWeeklyTitle.textContent = label + " - Bu Hafta İlk 100";
+  }
+
+  // ---------- Ayar eventleri ----------
+
+  document.querySelectorAll("input[name='time']").forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      gameTime = Number(e.target.value);
+      resetCurrentGame(false);
+      updateGameConfigForTime();
+    });
+  });
+
+  document.querySelectorAll("input[name='op']").forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      operationMode = e.target.value;
+    });
+  });
+
+  toggleMusic.addEventListener("change", () => {
+    musicEnabled = toggleMusic.checked;
+    if (!musicEnabled) {
+      stopMusic();
+    } else if (timerInterval) {
+      playMusic();
+    }
+  });
+
+  toggleEffects.addEventListener("change", () => {
+    effectsEnabled = toggleEffects.checked;
+  });
+
+  modeTabs.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode;
+      activeMode = mode;
+      modeTabs.forEach(b => b.classList.toggle("active", b === btn));
+      updateModeTitles();
+      renderScoreboard();
+    });
+  });
+
+  // ---------- Butonlar ----------
+
+  startBtn.addEventListener("click", () => {
+    const name = playerNameInput.value.trim();
+    if (!name) {
+      alert("Lütfen oyuna başlamadan önce ismini yaz.");
+      playerNameInput.focus();
+      return;
+    }
+
+    if (!isNameAllowed(name)) {
+      alert("Bu isim uygunsuz içerik taşıyor. Lütfen başka bir isim yaz.");
+      playerNameInput.focus();
+      return;
+    }
+
+    currentPlayer = name;
+
+    if (questionCount === 0) {
+      currentScore = 0;
+      updateScoreSummary();
+      startTimer();
+    } else if (!timerInterval) {
+      startTimer();
+    }
+    answerInput.disabled = false;
+    askNewQuestion();
+  });
+
+  checkBtn.addEventListener("click", () => {
+    checkAnswer();
+  });
+
+  answerInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      checkAnswer();
+    }
+  });
+
+  restartBtn.addEventListener("click", () => {
+    resetCurrentGame(false);
+  });
+
+  exitBtn.addEventListener("click", () => {
+    fullReset();
+    alert("Oyun sıfırlandı. Sayfayı kapatabilirsiniz.");
+  });
+
+  // ---------- Soru oluşturma ----------
+
+  function chooseOperationForQuestion() {
+    if (operationMode === "mix") {
+      const ops = ["mul","add","sub","div"];
+      currentOp = ops[Math.floor(Math.random() * ops.length)];
+    } else {
+      currentOp = operationMode;
+    }
+  }
+
+  function askNewQuestion() {
+    if (questionCount >= maxQuestions) {
+      endGameForCurrentPlayer(false);
+      return;
+    }
+
+    chooseOperationForQuestion();
+
+    let a, b;
+
+    switch (currentOp) {
+      case "add":
+        a = Math.floor(Math.random() * 50) + 1;
+        b = Math.floor(Math.random() * 50) + 1;
+        opSymbolEl.textContent = "+";
+        break;
+      case "sub":
+        a = Math.floor(Math.random() * 50) + 1;
+        b = Math.floor(Math.random() * 50) + 1;
+        if (b > a) [a, b] = [b, a];
+        opSymbolEl.textContent = "−";
+        break;
+      case "div":
+        const result = Math.floor(Math.random() * 10) + 1;
+        b = Math.floor(Math.random() * 10) + 1;
+        a = result * b;
+        opSymbolEl.textContent = "÷";
+        break;
+      case "mul":
+      default:
+        a = Math.floor(Math.random() * 10) + 1;
+        b = Math.floor(Math.random() * 10) + 1;
+        opSymbolEl.textContent = "×";
+        break;
+    }
+
+    currentA = a;
+    currentB = b;
+
+    factor1Box.textContent = currentA;
+    factor2Box.textContent = currentB;
+    answerInput.value = "";
+    answerInput.focus();
+
+    questionCount++;
+    updateQuestionInfo();
+  }
+
+  function getCorrectAnswer() {
+    switch (currentOp) {
+      case "add": return currentA + currentB;
+      case "sub": return currentA - currentB;
+      case "div": return currentA / currentB;
+      case "mul":
+      default: return currentA * currentB;
+    }
+  }
+
+  // ---------- Cevap kontrol ----------
+
+  function checkAnswer() {
+    if (currentA === null || currentB === null) return;
+
+    const val = answerInput.value.trim();
+    if (val === "") {
+      alert("Lütfen bir cevap yazın.");
+      answerInput.focus();
+      return;
+    }
+
+    const userAnswer = parseInt(val, 10);
+
+    if (isNaN(userAnswer)) {
+      alert("Lütfen sadece sayı yaz.");
+      answerInput.focus();
+      return;
+    }
+
+    const correctAnswer = getCorrectAnswer();
+
+    if (userAnswer === correctAnswer) {
+      currentScore += perQuestionScore;
+      if (currentScore > 100) currentScore = 100;
+      updateScoreSummary();
+      playCorrect();
+      showEmoji(true);
+    } else {
+      playWrong();
+      showEmoji(false);
+    }
+
+    if (questionCount >= maxQuestions) {
+      endGameForCurrentPlayer(false);
+    } else {
+      askNewQuestion();
+    }
+  }
+
+  // ---------- Oyun bitişi ----------
+
+  async function endGameForCurrentPlayer(timeUp) {
+    stopTimer();
+    stopMusic();
+    answerInput.disabled = true;
+    factor1Box.textContent = "?";
+    factor2Box.textContent = "?";
+    currentA = null;
+    currentB = null;
+
+    const fallbackName = playerNameInput.value.trim() || "İsimsiz";
+    const name = currentPlayer || fallbackName;
+    const finalScore = Math.round(currentScore * 10) / 10;
+    const puanMetni = formatScore(finalScore);
+
+    if (timeUp) {
+      alert("Süre bitti!\n" + name + " puanı: " + puanMetni + " / 100");
+    } else {
+      alert(name + " için tur bitti.\nPuan: " + puanMetni + " / 100");
+    }
+
+    await saveScoreOnline(name, finalScore);
+    await loadScoresOnline();
+
+    questionCount = 0;
+    currentScore = 0;
+    updateScoreSummary();
+    resetTimerOnly();
+    updateQuestionInfo();
+  }
+
+  // ---------- Reset fonksiyonları ----------
+
+  function resetCurrentGame(clearName) {
+    questionCount = 0;
+    currentScore = 0;
+    answerInput.value = "";
+    answerInput.disabled = true;
+    factor1Box.textContent = "?";
+    factor2Box.textContent = "?";
+    currentA = null;
+    currentB = null;
+    hideEmoji();
+    stopTimer();
+    stopMusic();
+    resetTimerOnly();
+    if (clearName) {
+      currentPlayer = "";
+      playerNameInput.value = "";
+    }
+    updateScoreSummary();
+    updateQuestionInfo();
+  }
+
+  function fullReset() {
+    resetCurrentGame(true);
+  }
+
+  function showEmoji(isCorrect) {
+    emojiIcon.textContent = isCorrect ? "😊" : "😢";
+    emojiCircle.classList.add("show");
+    setTimeout(() => {
+      hideEmoji();
+    }, 2000);
+  }
+
+  function hideEmoji() {
+    emojiCircle.classList.remove("show");
+  }
+
+  function playCorrect() {
+    if (!effectsEnabled) return;
+    if (correctSound) {
+      correctSound.currentTime = 0;
+      correctSound.play().catch(() => {});
+    }
+  }
+
+  function playWrong() {
+    if (!effectsEnabled) return;
+    if (wrongSound) {
+      wrongSound.currentTime = 0;
+      wrongSound.play().catch(() => {});
+    }
+  }
+
+  function playMusic() {
+    if (!musicEnabled) return;
+    if (bgMusic) {
+      bgMusic.currentTime = 0;
+      bgMusic.play().catch(() => {});
+    }
+  }
+
+  function stopMusic() {
+    if (bgMusic) {
+      bgMusic.pause();
+    }
+  }
+
+  function startTimer() {
+    stopTimer();
+    remainingTime = gameTime;
+    updateTimerDisplay();
+    playMusic();
+    timerInterval = setInterval(() => {
+      remainingTime--;
+      updateTimerDisplay();
+      if (remainingTime <= 0) {
+        stopTimer();
+        endGameForCurrentPlayer(true);
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function resetTimerOnly() {
+    remainingTime = gameTime;
+    updateTimerDisplay();
+  }
+
+  function updateTimerDisplay() {
+    timerDisplay.textContent = "SÜRE: " + remainingTime + " sn";
+  }
+
+  // ---------- Başlangıç ----------
+
+  updateGameConfigForTime();
+  updateScoreSummary();
+  updateTimerDisplay();
+  updateModeTitles();
+  loadScoresOnline();
+</script>
+</body>
+</html>
